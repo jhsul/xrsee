@@ -14,7 +14,7 @@ export class XRSeeDevice {
 
   constructor(url: string) {
     this.url = url;
-
+    //hi
     // Create hidden DOM elements
     this.audioSource = document.createElement("audio");
     this.videoSource = document.createElement("video");
