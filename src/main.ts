@@ -9,10 +9,14 @@ export const canvas = document.getElementById(
 export const engine = new BABYLON.Engine(canvas, true);
 
 export const scene = await createScene();
-
 export const gui = new XRSeeGUI();
-const car = new XRSeeDevice("ws://localhost:3001");
-await car.start();
+
+export const devices: XRSeeDevice[] = [];
+export let currentDevice: XRSeeDevice | null = null; // which device the controls should use
+export const setCurrentDevice = (device: XRSeeDevice) =>
+  (currentDevice = device);
+//const car = new XRSeeDevice("ws://localhost:3001");
+//await car.start();
 
 engine.runRenderLoop(function () {
   scene.render();

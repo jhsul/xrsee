@@ -6,10 +6,11 @@ export const createScene = async () => {
 
   const camera = new BABYLON.FreeCamera(
     "mainCamera",
-    new BABYLON.Vector3(0, 5, -10),
+    new BABYLON.Vector3(0, 1, 0),
     scene
   );
-  camera.setTarget(BABYLON.Vector3.Zero());
+  camera.setTarget(new BABYLON.Vector3(0, 1, 1));
+  //camera.setTarget(BABYLON.Vector3.Zero());
   camera.attachControl(canvas, true);
 
   const light = new BABYLON.HemisphericLight(

@@ -6,6 +6,7 @@ export class XRSeeDevice {
   ws?: WebSocket;
   pc?: RTCPeerConnection;
 
+  // The device mesh is just a wireframe outline showing the device's location
   deviceMesh: BABYLON.Mesh;
   videoMesh: BABYLON.Mesh;
 
@@ -14,12 +15,17 @@ export class XRSeeDevice {
 
   constructor(url: string) {
     this.url = url;
-    //hi
+
     // Create hidden DOM elements
     this.audioSource = document.createElement("audio");
     this.videoSource = document.createElement("video");
 
-    this.deviceMesh = BABYLON.MeshBuilder.CreateBox("deviceMesh");
+    this.videoSource.autoplay = true;
+
+    this.deviceMesh = BABYLON.MeshBuilder.CreateBox("deviceMesh", {
+      size: 0.25, // assume the device is roughly 25cm x 25cm x 25cm
+    });
+
     this.deviceMesh.material = new BABYLON.StandardMaterial(
       "deviceTexture",
       scene
@@ -29,8 +35,8 @@ export class XRSeeDevice {
     this.videoMesh = BABYLON.MeshBuilder.CreatePlane(
       "videoMesh",
       {
-        height: 6,
-        width: 8,
+        height: 0.75,
+        width: 1,
         sideOrientation: BABYLON.Mesh.DOUBLESIDE,
       },
       scene
@@ -38,8 +44,8 @@ export class XRSeeDevice {
 
     this.videoMesh.parent = this.deviceMesh;
 
-    this.deviceMesh.position = new BABYLON.Vector3(0, 0, 0);
-    this.videoMesh.position = new BABYLON.Vector3(0, 2, 0);
+    this.deviceMesh.position = new BABYLON.Vector3(0, 0, 3);
+    this.videoMesh.position = new BABYLON.Vector3(0, 1, 0);
 
     // Set the videoMesh texture to the video in this.videoSource
     // This will be empty until the WebRTC connection is established
@@ -55,6 +61,8 @@ export class XRSeeDevice {
     videoMaterial.emissiveColor = BABYLON.Color3.White();
 
     this.videoMesh.material = videoMaterial;
+
+    /*
     scene.onPointerObservable.add((evt) => {
       if (evt.pickInfo?.pickedMesh === this.videoMesh) {
         console.log("Picked");
@@ -65,6 +73,7 @@ export class XRSeeDevice {
         }
       }
     }, BABYLON.PointerEventTypes.POINTERPICK);
+    */
   }
 
   /**
