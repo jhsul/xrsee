@@ -1,5 +1,6 @@
-import * as BABYLON from "babylonjs";
-import { RCCar } from "./car";
+import * as BABYLON from "@babylonjs/core/Legacy/legacy";
+import { XRSeeDevice } from "./device";
+import { XRSeeGUI } from "./gui";
 import { createScene } from "./scene";
 
 export const canvas = document.getElementById(
@@ -7,13 +8,11 @@ export const canvas = document.getElementById(
 ) as HTMLCanvasElement;
 export const engine = new BABYLON.Engine(canvas, true);
 
-const scene = await createScene();
-const car = new RCCar("ws://localhost:3001");
+export const scene = await createScene();
 
-(document.getElementById("call") as HTMLButtonElement).onclick = async () => {
-  console.log("calling");
-  await car.startVideo();
-};
+export const gui = new XRSeeGUI();
+const car = new XRSeeDevice("ws://localhost:3001");
+await car.start();
 
 engine.runRenderLoop(function () {
   scene.render();
