@@ -5,7 +5,7 @@
   "homepage": "https://jhsul.github.io/xrsee",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --base=/xrsee/",
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"

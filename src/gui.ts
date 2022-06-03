@@ -56,7 +56,7 @@ export class XRSeeGUI {
         this.guiTexture.getControlByName("urlInputText") as InputText
       ).text;
 
-      const url = `ws://${inputText}`;
+      const url = inputText.startsWith("wss") ? inputText : `ws://${inputText}`;
       console.log(`Connecting to ${url}`);
 
       const device = new XRSeeDevice(url);
