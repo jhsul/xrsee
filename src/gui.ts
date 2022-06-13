@@ -12,19 +12,48 @@ import mainGui from "./layouts/mainGui.json";
 import { XRSeeDevice } from "./device";
 
 export class XRSeeGUI {
-  //guiMesh: BABYLON.Mesh;
+  guiMesh: BABYLON.Mesh;
   guiTexture: AdvancedDynamicTexture;
 
   constructor() {
+    this.guiMesh = BABYLON.MeshBuilder.CreatePlane(
+      "guiPlane",
+      { size: 0.5 },
+      scene
+    );
+    this.guiMesh.position = new BABYLON.Vector3(0, 1, 2);
+    this.guiMesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+
+    this.guiTexture = AdvancedDynamicTexture.CreateForMesh(
+      this.guiMesh,
+      400,
+      400
+    );
+    /*
+    full screen mode - not using anymore
     this.guiTexture = AdvancedDynamicTexture.CreateFullscreenUI(
       "ui",
       true,
       scene
     );
+    */
+    /*
+    var button1 = Button.CreateSimpleButton("but1", "Click Me");
+    button1.width = 1;
+    button1.height = 0.4;
+    button1.color = "white";
+    button1.fontSize = 50;
+    button1.background = "green";
+    button1.onPointerUpObservable.add(function () {
+      alert("you did it!");
+    });
+    this.guiTexture.addControl(button1);
+    */
     this.guiTexture.parseContent(mainGui);
 
     this.setupControls();
     this.hideAddDevicePrompt();
+    this.hideControlPanel();
   }
 
   /**
@@ -32,6 +61,7 @@ export class XRSeeGUI {
    * GUI control element
    */
   setupControls() {
+    // Connect to the car when connect is clicked
     // Show the prompt when the add device button is clicked
     (
       this.guiTexture.getControlByName("addDeviceButton") as Button
@@ -56,6 +86,26 @@ export class XRSeeGUI {
         this.guiTexture.getControlByName("urlInputText") as InputText
       ).text;
 
+      const addr = inputText;
+      console.log(`Connecting to ${addr}`);
+
+      const device = new XRSeeDevice(addr);
+      devices.push(device);
+      setCurrentDevice(device);
+
+      this.showControlPanel();
+
+      (async () => {
+        await device.startStreaming();
+        await device.startPiCar();
+      })();
+    });
+
+    /*
+      const inputText = (
+        this.guiTexture.getControlByName("urlInputText") as InputText
+      ).text;
+
       const url = inputText.startsWith("wss") ? inputText : `ws://${inputText}`;
       console.log(`Connecting to ${url}`);
 
@@ -63,7 +113,8 @@ export class XRSeeGUI {
       devices.push(device);
       setCurrentDevice(device);
       device.start();
-    });
+      */
+    //});
 
     // MOVEMENT CONTROLS
     // Eventually these will need to be forwarded to currentDevice
@@ -101,9 +152,11 @@ export class XRSeeGUI {
 
     moveForwardButton.onPointerDownObservable.add(() => {
       console.log("Move forward started");
+      currentDevice?.moveForward();
     });
     moveForwardButton.onPointerUpObservable.add(() => {
       console.log("Move forward released");
+      currentDevice?.stop();
     });
 
     // Move backward button
@@ -113,11 +166,15 @@ export class XRSeeGUI {
 
     moveBackwardButton.onPointerDownObservable.add(() => {
       console.log("Move backward started");
+      currentDevice?.moveBackward();
     });
     moveBackwardButton.onPointerUpObservable.add(() => {
       console.log("Move backward released");
+      currentDevice?.stop();
     });
   }
+  // COMPONENT VISIBILITY TOGGLES
+  // ----------------------------
   showAddDevicePrompt() {
     console.log("Showing add device prompt");
     (
@@ -125,9 +182,20 @@ export class XRSeeGUI {
     ).isVisible = true;
   }
   hideAddDevicePrompt() {
-    console.log("Showing add device prompt");
+    console.log("Hiding add device prompt");
     (
       this.guiTexture.getControlByName("addDevicePrompt") as StackPanel
     ).isVisible = false;
+  }
+
+  showControlPanel() {
+    console.log("Showing control panel");
+    (this.guiTexture.getControlByName("controlPanel") as StackPanel).isVisible =
+      true;
+  }
+  hideControlPanel() {
+    console.log("Hiding control panel");
+    (this.guiTexture.getControlByName("controlPanel") as StackPanel).isVisible =
+      false;
   }
 }

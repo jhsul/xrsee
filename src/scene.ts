@@ -3,6 +3,7 @@ import { canvas, engine } from "./main";
 
 export const createScene = async () => {
   const scene = new BABYLON.Scene(engine);
+  scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
 
   const camera = new BABYLON.FreeCamera(
     "mainCamera",
@@ -22,6 +23,9 @@ export const createScene = async () => {
   const env = scene.createDefaultEnvironment();
 
   const xr = await scene.createDefaultXRExperienceAsync({
+    uiOptions: {
+      //sessionMode: "immersive-ar",
+    },
     floorMeshes: [env?.ground!],
   });
 

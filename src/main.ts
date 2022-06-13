@@ -3,6 +3,8 @@ import { XRSeeDevice } from "./device";
 import { XRSeeGUI } from "./gui";
 import { createScene } from "./scene";
 
+const DEVICE_IP = "192.168.1.247";
+
 export const canvas = document.getElementById(
   "renderCanvas"
 ) as HTMLCanvasElement;

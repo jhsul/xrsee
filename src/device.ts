@@ -2,7 +2,11 @@ import * as BABYLON from "@babylonjs/core/Legacy/legacy";
 import { scene } from "./main";
 
 export class XRSeeDevice {
-  url: string;
+  addr: string;
+
+  wssPort: number;
+  carPort: number;
+
   ws?: WebSocket;
   pc?: RTCPeerConnection;
 
@@ -13,8 +17,10 @@ export class XRSeeDevice {
   audioSource: HTMLAudioElement;
   videoSource: HTMLVideoElement;
 
-  constructor(url: string) {
-    this.url = url;
+  constructor(addr: string, wssPort = 3001, carPort = 8000) {
+    this.addr = addr;
+    this.wssPort = wssPort;
+    this.carPort = carPort;
 
     // Create hidden DOM elements
     this.audioSource = document.createElement("audio");
@@ -76,16 +82,46 @@ export class XRSeeDevice {
     */
   }
 
+  async startPiCar() {
+    await fetch(`http://${this.addr}:${this.carPort}/run/?action=setup`, {
+      mode: "no-cors",
+    });
+    await fetch(`http://${this.addr}:${this.carPort}/run/?action=bwready`, {
+      mode: "no-cors",
+    });
+    await fetch(`http://${this.addr}:${this.carPort}/run/?action=fwready`, {
+      mode: "no-cors",
+    });
+
+    return true;
+  }
+
+  async moveForward() {
+    await fetch(`http://${this.addr}:${this.carPort}/run/?action=backward`, {
+      mode: "no-cors",
+    });
+  }
+  async moveBackward() {
+    await fetch(`http://${this.addr}:${this.carPort}/run/?action=forward`, {
+      mode: "no-cors",
+    });
+  }
+
+  async stop() {
+    await fetch(`http://${this.addr}:${this.carPort}/run/?action=stop`, {
+      mode: "no-cors",
+    });
+  }
   /**
    * This method establishes a websocket connection with the car's server,
    * then begins a WebRTC stream and places it in a DOM element.
    */
-  async start() {
+  async startStreaming() {
     this.pc = new RTCPeerConnection();
 
     // This promise resolves once the websocket connection is established
     await new Promise((resolve, reject) => {
-      this.ws = new WebSocket(this.url);
+      this.ws = new WebSocket(`ws://${this.addr}:${this.wssPort}`);
 
       this.pc?.addEventListener("track", (evt) => {
         if (evt.track.kind == "video") {
@@ -96,7 +132,9 @@ export class XRSeeDevice {
       });
 
       this.ws.onopen = () => {
-        console.log(`Established websocket connection with ${this.url}`);
+        console.log(
+          `Established websocket connection with ws://${this.addr}:${this.wssPort}`
+        );
         resolve(undefined);
       };
 
