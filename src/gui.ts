@@ -1,34 +1,42 @@
-import * as BABYLON from "@babylonjs/core/Legacy/legacy";
-import { Vector3 } from "@babylonjs/core/Legacy/legacy";
+import * as BABYLON from "babylonjs";
 import {
   AdvancedDynamicTexture,
   Button,
   InputText,
   StackPanel,
-} from "@babylonjs/gui/2D";
-import { currentDevice, devices, scene, setCurrentDevice } from "./main";
+} from "babylonjs-gui";
+import { currentDevice, scene, setCurrentDevice } from "./main";
 
 import mainGui from "./layouts/mainGui.json";
 import { XRSeeDevice } from "./device";
 
 export class XRSeeGUI {
-  guiMesh: BABYLON.Mesh;
+  guiMesh?: BABYLON.Mesh;
   guiTexture: AdvancedDynamicTexture;
 
-  constructor() {
-    this.guiMesh = BABYLON.MeshBuilder.CreatePlane(
-      "guiPlane",
-      { size: 0.5 },
-      scene
-    );
-    this.guiMesh.position = new BABYLON.Vector3(0, 1, 2);
-    this.guiMesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+  constructor(fullscreen = false) {
+    if (fullscreen) {
+      this.guiTexture = AdvancedDynamicTexture.CreateFullscreenUI(
+        "gui",
+        true,
+        scene
+      );
+    } else {
+      this.guiMesh = BABYLON.MeshBuilder.CreatePlane(
+        "guiPlane",
+        { size: 0.5 },
+        scene
+      );
+      this.guiMesh.position = new BABYLON.Vector3(0, 0, 2);
+      this.guiMesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
 
-    this.guiTexture = AdvancedDynamicTexture.CreateForMesh(
-      this.guiMesh,
-      400,
-      400
-    );
+      this.guiTexture = AdvancedDynamicTexture.CreateForMesh(
+        this.guiMesh,
+        400,
+        400
+      );
+    }
+
     /*
     full screen mode - not using anymore
     this.guiTexture = AdvancedDynamicTexture.CreateFullscreenUI(
@@ -66,6 +74,7 @@ export class XRSeeGUI {
     (
       this.guiTexture.getControlByName("addDeviceButton") as Button
     ).onPointerDownObservable.add(() => {
+      console.log("HELLLOOO");
       this.showAddDevicePrompt();
     });
 
@@ -90,7 +99,6 @@ export class XRSeeGUI {
       console.log(`Connecting to ${addr}`);
 
       const device = new XRSeeDevice(addr);
-      devices.push(device);
       setCurrentDevice(device);
 
       this.showControlPanel();

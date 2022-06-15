@@ -10,13 +10,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "noEmit": true,
+    "noEmit": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "skipLibCheck": true,
 
-    "types": []
+    "types": ["node"]
   },
   "include": ["src"]
 }

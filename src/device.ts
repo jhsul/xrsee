@@ -1,11 +1,21 @@
-import * as BABYLON from "@babylonjs/core/Legacy/legacy";
-import { scene } from "./main";
+import * as BABYLON from "babylonjs";
+import { scene, trackerTransformNode } from "./main";
+
+const NGROK_WSS = "wss://7676-108-20-144-23.ngrok.io";
+const NGROK_CAR = "https://c536-108-20-144-23.ngrok.io";
+
+const USE_NGROK = true;
+
+const VIDEO_SIZE = 1;
 
 export class XRSeeDevice {
   addr: string;
 
   wssPort: number;
   carPort: number;
+
+  wssAddr: string;
+  carAddr: string;
 
   ws?: WebSocket;
   pc?: RTCPeerConnection;
@@ -22,6 +32,9 @@ export class XRSeeDevice {
     this.wssPort = wssPort;
     this.carPort = carPort;
 
+    this.wssAddr = USE_NGROK ? NGROK_WSS : `ws://${addr}:${wssPort}`;
+    this.carAddr = USE_NGROK ? NGROK_CAR : `http://${addr}:${carPort}`;
+
     // Create hidden DOM elements
     this.audioSource = document.createElement("audio");
     this.videoSource = document.createElement("video");
@@ -36,22 +49,26 @@ export class XRSeeDevice {
       "deviceTexture",
       scene
     );
-    this.deviceMesh.material.wireframe = true;
+    //this.deviceMesh.material.wireframe = true;
 
     this.videoMesh = BABYLON.MeshBuilder.CreatePlane(
       "videoMesh",
       {
-        height: 0.75,
-        width: 1,
+        // Received video is 640x480
+        height: VIDEO_SIZE * 0.75,
+        width: VIDEO_SIZE,
         sideOrientation: BABYLON.Mesh.DOUBLESIDE,
       },
       scene
     );
 
+    this.deviceMesh.parent = trackerTransformNode;
     this.videoMesh.parent = this.deviceMesh;
 
-    this.deviceMesh.position = new BABYLON.Vector3(0, 0, 3);
+    this.deviceMesh.position = new BABYLON.Vector3(0, 0, 0);
     this.videoMesh.position = new BABYLON.Vector3(0, 1, 0);
+    this.videoMesh.rotation.x = Math.PI / 2;
+    this.videoMesh.rotation.z = Math.PI;
 
     // Set the videoMesh texture to the video in this.videoSource
     // This will be empty until the WebRTC connection is established
@@ -83,13 +100,13 @@ export class XRSeeDevice {
   }
 
   async startPiCar() {
-    await fetch(`http://${this.addr}:${this.carPort}/run/?action=setup`, {
+    await fetch(`${this.carAddr}/run/?action=setup`, {
       mode: "no-cors",
     });
-    await fetch(`http://${this.addr}:${this.carPort}/run/?action=bwready`, {
+    await fetch(`${this.carAddr}/run/?action=bwready`, {
       mode: "no-cors",
     });
-    await fetch(`http://${this.addr}:${this.carPort}/run/?action=fwready`, {
+    await fetch(`${this.carAddr}/run/?action=fwready`, {
       mode: "no-cors",
     });
 
@@ -97,18 +114,18 @@ export class XRSeeDevice {
   }
 
   async moveForward() {
-    await fetch(`http://${this.addr}:${this.carPort}/run/?action=backward`, {
+    await fetch(`${this.carAddr}/run/?action=backward`, {
       mode: "no-cors",
     });
   }
   async moveBackward() {
-    await fetch(`http://${this.addr}:${this.carPort}/run/?action=forward`, {
+    await fetch(`${this.carAddr}/run/?action=forward`, {
       mode: "no-cors",
     });
   }
 
   async stop() {
-    await fetch(`http://${this.addr}:${this.carPort}/run/?action=stop`, {
+    await fetch(`${this.carAddr}/run/?action=stop`, {
       mode: "no-cors",
     });
   }
@@ -121,7 +138,7 @@ export class XRSeeDevice {
 
     // This promise resolves once the websocket connection is established
     await new Promise((resolve, reject) => {
-      this.ws = new WebSocket(`ws://${this.addr}:${this.wssPort}`);
+      this.ws = new WebSocket(this.wssAddr);
 
       this.pc?.addEventListener("track", (evt) => {
         if (evt.track.kind == "video") {
@@ -132,9 +149,7 @@ export class XRSeeDevice {
       });
 
       this.ws.onopen = () => {
-        console.log(
-          `Established websocket connection with ws://${this.addr}:${this.wssPort}`
-        );
+        console.log(`Established websocket connection with ${this.wssAddr}`);
         resolve(undefined);
       };
 
