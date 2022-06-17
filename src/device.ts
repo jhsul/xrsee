@@ -1,12 +1,12 @@
 import * as BABYLON from "babylonjs";
 import { scene, trackerTransformNode } from "./main";
 
-const NGROK_WSS = "wss://7676-108-20-144-23.ngrok.io";
-const NGROK_CAR = "https://c536-108-20-144-23.ngrok.io";
+const NGROK_WSS = "wss://1d8b-108-20-144-23.ngrok.io";
+const NGROK_CAR = "https://b2df-108-20-144-23.ngrok.io";
 
 const USE_NGROK = true;
 
-const VIDEO_SIZE = 1;
+const VIDEO_SIZE = 3;
 
 export class XRSeeDevice {
   addr: string;

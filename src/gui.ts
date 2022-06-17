@@ -4,6 +4,7 @@ import {
   Button,
   InputText,
   StackPanel,
+  TextBlock,
 } from "babylonjs-gui";
 import { currentDevice, scene, setCurrentDevice } from "./main";
 
@@ -69,6 +70,8 @@ export class XRSeeGUI {
    * GUI control element
    */
   setupControls() {
+    (this.guiTexture.getControlByName("statusText") as TextBlock).text =
+      "XRSee";
     // Connect to the car when connect is clicked
     // Show the prompt when the add device button is clicked
     (
