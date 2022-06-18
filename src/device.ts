@@ -1,8 +1,8 @@
 import * as BABYLON from "babylonjs";
 import { scene, trackerTransformNode } from "./main";
 
-const NGROK_WSS = "wss://1d8b-108-20-144-23.ngrok.io";
-const NGROK_CAR = "https://b2df-108-20-144-23.ngrok.io";
+const NGROK_WSS = "wss://ffe6-108-20-144-23.ngrok.io";
+const NGROK_CAR = "https://6721-108-20-144-23.ngrok.io";
 
 const USE_NGROK = true;
 
@@ -29,6 +29,7 @@ export class XRSeeDevice {
 
   constructor(addr: string, wssPort = 3001, carPort = 8000) {
     this.addr = addr;
+
     this.wssPort = wssPort;
     this.carPort = carPort;
 
@@ -41,6 +42,8 @@ export class XRSeeDevice {
 
     this.videoSource.autoplay = true;
 
+    //TODO: Add car render
+    //@guha
     this.deviceMesh = BABYLON.MeshBuilder.CreateBox("deviceMesh", {
       size: 0.25, // assume the device is roughly 25cm x 25cm x 25cm
     });
