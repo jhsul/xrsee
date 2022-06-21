@@ -1,4 +1,5 @@
 import * as BABYLON from "babylonjs";
+import { FreeCameraDeviceOrientationInput } from "babylonjs";
 import { scene, trackerTransformNode } from "./main";
 
 const NGROK_WSS = process.env.NGROK_WSS!;
@@ -14,6 +15,8 @@ console.log(`Using:\nwss: ${NGROK_WSS}\ncar:${NGROK_CAR}`);
 const USE_NGROK = true;
 
 const VIDEO_SIZE = 3;
+
+export type CarOrientation = "straight" | "left" | "right";
 
 export class XRSeeDevice {
   addr: string;
@@ -34,8 +37,11 @@ export class XRSeeDevice {
   audioSource: HTMLAudioElement;
   videoSource: HTMLVideoElement;
 
+  orientation: CarOrientation;
+
   constructor(addr: string, wssPort = 3001, carPort = 8000) {
     this.addr = addr;
+    this.orientation = "straight";
 
     this.wssPort = wssPort;
     this.carPort = carPort;
@@ -113,23 +119,47 @@ export class XRSeeDevice {
     await fetch(`${this.carAddr}/run/?action=setup`, {
       mode: "no-cors",
     });
+    /*
     await fetch(`${this.carAddr}/run/?action=bwready`, {
       mode: "no-cors",
     });
     await fetch(`${this.carAddr}/run/?action=fwready`, {
       mode: "no-cors",
     });
+    */
 
     return true;
   }
 
   async moveForward() {
-    await fetch(`${this.carAddr}/run/?action=backward`, {
+    await fetch(`${this.carAddr}/run/?action=forward`, {
       mode: "no-cors",
     });
   }
   async moveBackward() {
-    await fetch(`${this.carAddr}/run/?action=forward`, {
+    await fetch(`${this.carAddr}/run/?action=backward`, {
+      mode: "no-cors",
+    });
+  }
+
+  async turnLeft() {
+    this.orientation = this.orientation === "left" ? "straight" : "left";
+    await this.updateSteering();
+  }
+  async turnRight() {
+    this.orientation = this.orientation === "right" ? "straight" : "right";
+    await this.updateSteering();
+  }
+
+  async updateSteering() {
+    const action =
+      this.orientation === "left"
+        ? "fwleft"
+        : this.orientation === "right"
+        ? "fwright"
+        : "fwstraight";
+
+    await fetch(`${this.carAddr}/run/?action=${action}`, {
       mode: "no-cors",
     });
   }

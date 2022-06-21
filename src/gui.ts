@@ -11,9 +11,25 @@ import { currentDevice, scene, setCurrentDevice } from "./main";
 import mainGui from "./layouts/mainGui.json";
 import { XRSeeDevice } from "./device";
 
+const DEFAULT_BUTTON_COLOR = "#333333";
+
 export class XRSeeGUI {
   guiMesh?: BABYLON.Mesh;
   guiTexture: AdvancedDynamicTexture;
+
+  statusText: TextBlock;
+  addDeviceButton: Button;
+  cancelAddDeviceButton: Button;
+  connectDeviceButton: Button;
+  urlInputText: InputText;
+
+  turnLeftButton: Button;
+  turnRightButton: Button;
+  moveForwardButton: Button;
+  moveBackwardButton: Button;
+
+  addDevicePrompt: StackPanel;
+  controlPanel: StackPanel;
 
   constructor(fullscreen = false) {
     if (fullscreen) {
@@ -60,6 +76,43 @@ export class XRSeeGUI {
     */
     this.guiTexture.parseContent(mainGui);
 
+    this.statusText = this.guiTexture.getControlByName(
+      "statusText"
+    ) as TextBlock;
+    this.addDeviceButton = this.guiTexture.getControlByName(
+      "addDeviceButton"
+    ) as Button;
+    this.cancelAddDeviceButton = this.guiTexture.getControlByName(
+      "cancelAddDeviceButton"
+    ) as Button;
+    this.connectDeviceButton = this.guiTexture.getControlByName(
+      "connectDeviceButton"
+    ) as Button;
+    this.urlInputText = this.guiTexture.getControlByName(
+      "urlInputText"
+    ) as InputText;
+
+    this.turnLeftButton = this.guiTexture.getControlByName(
+      "turnLeftButton"
+    ) as Button;
+    this.turnRightButton = this.guiTexture.getControlByName(
+      "turnRightButton"
+    ) as Button;
+
+    this.moveForwardButton = this.guiTexture.getControlByName(
+      "moveForwardButton"
+    ) as Button;
+    this.moveBackwardButton = this.guiTexture.getControlByName(
+      "moveBackwardButton"
+    ) as Button;
+
+    this.addDevicePrompt = this.guiTexture.getControlByName(
+      "addDevicePrompt"
+    ) as StackPanel;
+    this.controlPanel = this.guiTexture.getControlByName(
+      "controlPanel"
+    ) as StackPanel;
+
     this.setupControls();
     this.hideAddDevicePrompt();
     this.hideControlPanel();
@@ -70,33 +123,22 @@ export class XRSeeGUI {
    * GUI control element
    */
   setupControls() {
-    (this.guiTexture.getControlByName("statusText") as TextBlock).text =
-      "XRSee";
-    // Connect to the car when connect is clicked
+    this.statusText.text = "XRSee";
     // Show the prompt when the add device button is clicked
-    (
-      this.guiTexture.getControlByName("addDeviceButton") as Button
-    ).onPointerDownObservable.add(() => {
-      console.log("HELLLOOO");
+    this.addDeviceButton.onPointerDownObservable.add(() => {
       this.showAddDevicePrompt();
     });
 
     // Hide the prompt when cancel is clicked
-    (
-      this.guiTexture.getControlByName("cancelAddDeviceButton") as Button
-    ).onPointerDownObservable.add(() => {
+    this.cancelAddDeviceButton.onPointerDownObservable.add(() => {
       this.hideAddDevicePrompt();
     });
 
     // Connect to the car when connect is clicked
-    (
-      this.guiTexture.getControlByName("connectDeviceButton") as Button
-    ).onPointerDownObservable.add(() => {
+    this.connectDeviceButton.onPointerDownObservable.add(() => {
       this.hideAddDevicePrompt();
 
-      const inputText = (
-        this.guiTexture.getControlByName("urlInputText") as InputText
-      ).text;
+      const inputText = this.urlInputText.text;
 
       const addr = inputText;
       console.log(`Connecting to ${addr}`);
@@ -107,8 +149,9 @@ export class XRSeeGUI {
       this.showControlPanel();
 
       (async () => {
-        await device.startStreaming();
-        await device.startPiCar();
+        await Promise.all([device.startStreaming(), device.startPiCar()]);
+        //await device.startStreaming();
+        //await device.startPiCar();
       })();
     });
 
@@ -133,54 +176,52 @@ export class XRSeeGUI {
     //-----------------------
 
     // Turn left button
-    const turnLeftButton = this.guiTexture.getControlByName(
-      "turnLeftButton"
-    ) as Button;
 
-    turnLeftButton.onPointerDownObservable.add(() => {
+    this.turnLeftButton.onPointerDownObservable.add(async () => {
       console.log("Turn left started");
+
+      await currentDevice?.turnLeft();
+      this.updateControlsFromDirection();
     });
-    turnLeftButton.onPointerUpObservable.add(() => {
+    this.turnLeftButton.onPointerUpObservable.add(async () => {
       console.log("Turn left released");
+
+      //this.updateControlsFromDirection();
     });
 
     // Turn right button
-    const turnRightButton = this.guiTexture.getControlByName(
-      "turnRightButton"
-    ) as Button;
 
-    turnRightButton.onPointerDownObservable.add(() => {
+    this.turnRightButton.onPointerDownObservable.add(async () => {
       console.log("Turn right started");
+      await currentDevice?.turnRight();
+
+      this.updateControlsFromDirection();
     });
-    turnRightButton.onPointerUpObservable.add(() => {
+    this.turnRightButton.onPointerUpObservable.add(async () => {
       console.log("Turn right released");
     });
 
     // Move forward button
-    const moveForwardButton = this.guiTexture.getControlByName(
-      "moveForwardButton"
-    ) as Button;
-
-    moveForwardButton.onPointerDownObservable.add(() => {
+    this.moveForwardButton.onPointerDownObservable.add(() => {
       console.log("Move forward started");
+      this.moveForwardButton.background = "#00FF00";
       currentDevice?.moveForward();
     });
-    moveForwardButton.onPointerUpObservable.add(() => {
+    this.moveForwardButton.onPointerUpObservable.add(() => {
       console.log("Move forward released");
+      this.moveForwardButton.background = DEFAULT_BUTTON_COLOR;
       currentDevice?.stop();
     });
 
     // Move backward button
-    const moveBackwardButton = this.guiTexture.getControlByName(
-      "moveBackwardButton"
-    ) as Button;
-
-    moveBackwardButton.onPointerDownObservable.add(() => {
+    this.moveBackwardButton.onPointerDownObservable.add(() => {
       console.log("Move backward started");
+      this.moveBackwardButton.background = "#00FF00";
       currentDevice?.moveBackward();
     });
-    moveBackwardButton.onPointerUpObservable.add(() => {
+    this.moveBackwardButton.onPointerUpObservable.add(() => {
       console.log("Move backward released");
+      this.moveBackwardButton.background = DEFAULT_BUTTON_COLOR;
       currentDevice?.stop();
     });
   }
@@ -188,25 +229,39 @@ export class XRSeeGUI {
   // ----------------------------
   showAddDevicePrompt() {
     console.log("Showing add device prompt");
-    (
-      this.guiTexture.getControlByName("addDevicePrompt") as StackPanel
-    ).isVisible = true;
+    this.addDevicePrompt.isVisible = true;
   }
   hideAddDevicePrompt() {
-    console.log("Hiding add device prompt");
-    (
-      this.guiTexture.getControlByName("addDevicePrompt") as StackPanel
-    ).isVisible = false;
+    this.addDevicePrompt.isVisible = false;
   }
 
   showControlPanel() {
     console.log("Showing control panel");
-    (this.guiTexture.getControlByName("controlPanel") as StackPanel).isVisible =
-      true;
+    this.controlPanel.isVisible = true;
   }
   hideControlPanel() {
     console.log("Hiding control panel");
-    (this.guiTexture.getControlByName("controlPanel") as StackPanel).isVisible =
-      false;
+    this.controlPanel.isVisible = false;
+  }
+
+  updateControlsFromDirection() {
+    switch (currentDevice?.orientation) {
+      case "straight":
+        this.turnLeftButton.background = DEFAULT_BUTTON_COLOR;
+        this.turnRightButton.background = DEFAULT_BUTTON_COLOR;
+        break;
+
+      case "left":
+        this.turnLeftButton.background = "#0000FF";
+        this.turnRightButton.background = DEFAULT_BUTTON_COLOR;
+        break;
+      case "right":
+        this.turnLeftButton.background = DEFAULT_BUTTON_COLOR;
+        this.turnRightButton.background = "#0000FF";
+        break;
+      default:
+        console.error("how does the car not have a direction?");
+        break;
+    }
   }
 }
