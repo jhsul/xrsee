@@ -1,8 +1,15 @@
 import * as BABYLON from "babylonjs";
 import { scene, trackerTransformNode } from "./main";
 
-const NGROK_WSS = "wss://ffe6-108-20-144-23.ngrok.io";
-const NGROK_CAR = "https://6721-108-20-144-23.ngrok.io";
+const NGROK_WSS = process.env.NGROK_WSS!;
+const NGROK_CAR = process.env.NGROK_CAR!;
+
+if (!NGROK_CAR || !NGROK_WSS) {
+  console.error("Add the ngrok stuff to .env dumbass lol");
+  process.exit();
+}
+
+console.log(`Using:\nwss: ${NGROK_WSS}\ncar:${NGROK_CAR}`);
 
 const USE_NGROK = true;
 
