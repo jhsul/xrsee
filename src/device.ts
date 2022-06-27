@@ -1,4 +1,5 @@
 import * as BABYLON from "babylonjs";
+import { Mesh, ThinRenderTargetTexture } from "babylonjs";
 
 import { scene, trackerTransformNode } from "./main";
 
@@ -31,8 +32,8 @@ export class XRSeeDevice {
   pc?: RTCPeerConnection;
 
   // The device mesh is just a wireframe outline showing the device's location
-  deviceMesh: BABYLON.Mesh;
-  videoMesh: BABYLON.Mesh;
+  deviceMesh?: BABYLON.Mesh;
+  videoMesh?: BABYLON.Mesh;
 
   audioSource: HTMLAudioElement;
   videoSource: HTMLVideoElement;
@@ -55,17 +56,22 @@ export class XRSeeDevice {
 
     this.videoSource.autoplay = true;
 
-    // This should be loaded already in main.ts
+    this.setupMeshes();
+  }
 
-    //this.deviceMesh = scene.getMeshByName("car") as BABYLON.Mesh;
-    this.deviceMesh = BABYLON.MeshBuilder.CreateBox("box", { size: 0.25 });
-
-    this.deviceMesh.material = new BABYLON.StandardMaterial(
-      "deviceTexture",
+  async setupMeshes() {
+    const res = await BABYLON.SceneLoader.ImportMeshAsync(
+      "",
+      "https://dl.dropboxusercontent.com/s/ng4dkd47yk3dfw8/",
+      "car%20%283%29.glb",
       scene
     );
-    //this.deviceMesh.material.wireframe = true;
+    this.deviceMesh = res.meshes[0] as Mesh;
 
+    /*
+    this.deviceMesh =
+      (scene.getMeshByName("car") as Mesh) ||
+      BABYLON.MeshBuilder.CreateBox("box", { size: 0.25 });*/
     this.videoMesh = BABYLON.MeshBuilder.CreatePlane(
       "videoMesh",
       {
@@ -77,10 +83,16 @@ export class XRSeeDevice {
       scene
     );
 
+    //this.deviceMesh.isVisible = false;
     this.deviceMesh.parent = trackerTransformNode;
     this.videoMesh.parent = this.deviceMesh;
 
     this.deviceMesh.position = new BABYLON.Vector3(0, 0, 0);
+    this.deviceMesh.visibility = 0; //hidden by default
+
+    this.deviceMesh.scaling = new BABYLON.Vector3(0.25, 0.25, 0.25);
+    this.deviceMesh.addRotation((3 * Math.PI) / 2, Math.PI, 0);
+
     this.videoMesh.position = new BABYLON.Vector3(0, 1, 0);
     this.videoMesh.rotation.x = Math.PI / 2;
     this.videoMesh.rotation.z = Math.PI;
@@ -99,27 +111,6 @@ export class XRSeeDevice {
     videoMaterial.emissiveColor = BABYLON.Color3.White();
 
     this.videoMesh.material = videoMaterial;
-
-    //TODO: Add car render
-    //@guha
-    /*
-    this.deviceMesh = BABYLON.MeshBuilder.CreateBox("deviceMesh", {
-      size: 0.25, // assume the device is roughly 25cm x 25cm x 25cm
-    });
-*/
-
-    /*
-    scene.onPointerObservable.add((evt) => {
-      if (evt.pickInfo?.pickedMesh === this.videoMesh) {
-        console.log("Picked");
-        if (videoTexture.video.paused) {
-          videoTexture.video.play();
-        } else {
-          videoTexture.video.pause();
-        }
-      }
-    }, BABYLON.PointerEventTypes.POINTERPICK);
-    */
   }
 
   async startPiCar() {

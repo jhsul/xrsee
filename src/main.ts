@@ -2,8 +2,8 @@ import * as BABYLON from "babylonjs";
 import * as ZapparBabylon from "@zappar/zappar-babylonjs";
 import { XRSeeDevice } from "./device";
 import { XRSeeGUI } from "./gui";
-import { Quaternion, Vector3 } from "babylonjs";
-
+import { Mesh, Quaternion, Vector3 } from "babylonjs";
+import "babylonjs-loaders";
 // MAIN APP STATE
 //---------------
 export let currentDevice: XRSeeDevice;
@@ -22,11 +22,6 @@ const engine = new BABYLON.Engine(canvas, true, {
 
 export const scene = new BABYLON.Scene(engine);
 
-/*
-await BABYLON.SceneLoader.AppendAsync("assets/", "car.glb", scene, (e) => {
-  console.log(`Loading car: ${((e.loaded / e.total) * 100).toFixed(2)}%`);
-});
-*/
 const light = new BABYLON.HemisphericLight(
   "light",
   new BABYLON.Vector3(0, 1, 0),
@@ -64,20 +59,12 @@ export const trackerTransformNode = new ZapparBabylon.ImageAnchorTransformNode(
   scene
 );
 
-/*
-// Add some content to the image tracker
-const box = BABYLON.Mesh.CreateBox(
-  "box",
-  1,
-  scene,
-  false,
-  BABYLON.Mesh.DOUBLESIDE
-);
-box.parent = trackerTransformNode;
-box.visibility = 0;
-*/
-
-imageTracker.onVisible.bind(() => {});
+imageTracker.onVisible.bind(() => {
+  if (currentDevice.deviceMesh) {
+    console.log("Showing device");
+    currentDevice.deviceMesh.visibility = 1;
+  }
+});
 
 imageTracker.onNotVisible.bind(() => {
   //box.visibility = 0;

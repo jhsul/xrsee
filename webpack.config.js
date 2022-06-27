@@ -55,14 +55,17 @@ module.exports = {
       },
       {
         test: /\.(glb|gltf)$/,
+        type: "asset/resource",
+        /*
         use: [
           {
-            loader: "file-loader",
+            //loader: "file-loader",
             options: {
-              name: "/public/icons/[name].[ext]",
+              outputPath: "assets/",
             },
           },
         ],
+        */
       },
     ],
   },
