@@ -22,6 +22,11 @@ const engine = new BABYLON.Engine(canvas, true, {
 
 export const scene = new BABYLON.Scene(engine);
 
+/*
+await BABYLON.SceneLoader.AppendAsync("assets/", "car.glb", scene, (e) => {
+  console.log(`Loading car: ${((e.loaded / e.total) * 100).toFixed(2)}%`);
+});
+*/
 const light = new BABYLON.HemisphericLight(
   "light",
   new BABYLON.Vector3(0, 1, 0),
@@ -39,7 +44,9 @@ const xr = await scene.createDefaultXRExperienceAsync({
   floorMeshes: [env?.ground!],
 });
 */
+
 export const camera = new ZapparBabylon.Camera("camera", scene);
+
 //--------------
 
 ZapparBabylon.permissionRequestUI().then((granted) => {

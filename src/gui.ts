@@ -149,9 +149,9 @@ export class XRSeeGUI {
       this.showControlPanel();
 
       (async () => {
-        await Promise.all([device.startStreaming(), device.startPiCar()]);
-        //await device.startStreaming();
-        //await device.startPiCar();
+        //await Promise.all([device.startStreaming(), device.startPiCar()]);
+        await device.startStreaming();
+        await device.startPiCar();
       })();
     });
 

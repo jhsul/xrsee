@@ -1,5 +1,5 @@
 import * as BABYLON from "babylonjs";
-import { FreeCameraDeviceOrientationInput } from "babylonjs";
+
 import { scene, trackerTransformNode } from "./main";
 
 const NGROK_WSS = process.env.NGROK_WSS!;
@@ -55,11 +55,10 @@ export class XRSeeDevice {
 
     this.videoSource.autoplay = true;
 
-    //TODO: Add car render
-    //@guha
-    this.deviceMesh = BABYLON.MeshBuilder.CreateBox("deviceMesh", {
-      size: 0.25, // assume the device is roughly 25cm x 25cm x 25cm
-    });
+    // This should be loaded already in main.ts
+
+    //this.deviceMesh = scene.getMeshByName("car") as BABYLON.Mesh;
+    this.deviceMesh = BABYLON.MeshBuilder.CreateBox("box", { size: 0.25 });
 
     this.deviceMesh.material = new BABYLON.StandardMaterial(
       "deviceTexture",
@@ -100,6 +99,14 @@ export class XRSeeDevice {
     videoMaterial.emissiveColor = BABYLON.Color3.White();
 
     this.videoMesh.material = videoMaterial;
+
+    //TODO: Add car render
+    //@guha
+    /*
+    this.deviceMesh = BABYLON.MeshBuilder.CreateBox("deviceMesh", {
+      size: 0.25, // assume the device is roughly 25cm x 25cm x 25cm
+    });
+*/
 
     /*
     scene.onPointerObservable.add((evt) => {

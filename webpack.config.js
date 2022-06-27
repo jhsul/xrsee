@@ -53,6 +53,17 @@ module.exports = {
         type: "javascript/auto",
         loader: "file-loader",
       },
+      {
+        test: /\.(glb|gltf)$/,
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              name: "/public/icons/[name].[ext]",
+            },
+          },
+        ],
+      },
     ],
   },
 };
