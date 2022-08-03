@@ -93,8 +93,8 @@ export class XRSeeDevice {
     this.deviceMesh.scaling = new BABYLON.Vector3(0.25, 0.25, 0.25);
     this.deviceMesh.addRotation((3 * Math.PI) / 2, Math.PI, 0);
 
-    this.videoMesh.position = new BABYLON.Vector3(0, 1, 0);
-    this.videoMesh.rotation.x = Math.PI / 2;
+    this.videoMesh.position = new BABYLON.Vector3(0, 1, 3);
+    this.videoMesh.rotation.x = -Math.PI;
     this.videoMesh.rotation.z = Math.PI;
 
     // Set the videoMesh texture to the video in this.videoSource
